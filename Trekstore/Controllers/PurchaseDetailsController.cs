@@ -21,7 +21,7 @@ namespace Trekstore.Controllers
         {
             _context = context;
         }
-
+        [Authorize]
         // GET: PurchaseDetails
         public async Task<IActionResult> Index()
         {
