@@ -65,9 +65,16 @@ namespace Trekstore.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(salesDetails);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var product = await _context.Products.FindAsync(salesDetails.ProductId);
+                if (product != null && product.InStock >= salesDetails.Amount)
+                {
+                    product.InStock -= salesDetails.Amount;
+                    _context.Add(salesDetails);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                ModelState.AddModelError("", "Insufficient stock for the selected product.");
+
             }
             ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "ClientId", salesDetails.ClientId);
             ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductDescription", salesDetails.ProductId);

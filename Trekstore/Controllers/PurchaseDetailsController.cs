@@ -66,9 +66,13 @@ namespace Trekstore.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(purchaseDetails);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var product = await _context.Products.FindAsync(purchaseDetails.ProductID);
+                
+                    product.InStock += purchaseDetails.Amount;
+                    _context.Add(purchaseDetails);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                
             }
             ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductDescription", purchaseDetails.ProductID);
             ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "ProviderID", purchaseDetails.ProviderID);
