@@ -46,6 +46,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Clients/Create
+
         public IActionResult Create()
         {
             return View();
@@ -68,6 +69,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Clients/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -86,6 +88,7 @@ namespace Trekstore.Controllers
         // POST: Clients/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ClientId,FirstName,LastName,PhoneNumber,Email")] Client client)
@@ -119,6 +122,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Clients/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -137,6 +141,7 @@ namespace Trekstore.Controllers
         }
 
         // POST: Clients/Delete/5
+        [Authorize(Roles = "Administrador")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

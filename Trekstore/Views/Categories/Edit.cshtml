@@ -5,9 +5,9 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
+<h1>Editar</h1>
 
-<h4>Categories</h4>
+<h4>Categoria</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -15,26 +15,29 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="CategoryID" />
             <div class="form-group">
-                <label asp-for="CategoriaNombre" class="control-label"></label>
+                <label asp-for="CategoriaNombre" class="control-label">Categoria</label>
                 <input asp-for="CategoriaNombre" class="form-control" />
                 <span asp-validation-for="CategoriaNombre" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CategoriaDescripcion" class="control-label"></label>
+                <label asp-for="CategoriaDescripcion" class="control-label">Descripcion</label>
                 <input asp-for="CategoriaDescripcion" class="form-control" />
                 <span asp-validation-for="CategoriaDescripcion" class="text-danger"></span>
             </div>
+            <br />
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Guardar" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
-
+<br />
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Regresar</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

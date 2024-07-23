@@ -5,24 +5,24 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Proveedores</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
-    <a asp-controller="PurchaseDetails" asp-action="Index">Return</a>
+    <a asp-action="Create">Agregar Proveedor</a>
+    <a asp-controller="PurchaseDetails" asp-action="Index">Regresar</a>
 
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                Proveedor
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Telephone)
+                Telefono
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
+                Direccion
             </th>
             <th></th>
         </tr>
@@ -40,9 +40,16 @@
                 @Html.DisplayFor(modelItem => item.Address)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ProviderID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ProviderID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProviderID">Delete</a>
+                    @if (ViewContext.HttpContext.User.IsInRole("Administrador"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ProviderID">Editar | </a>
+                        <a asp-action="Delete" asp-route-id="@item.ProviderID">Eliminar</a>
+                    }
+
+                    @if (ViewContext.HttpContext.User.IsInRole("Ventas, Supervisor"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ProviderID">Editar</a>
+                    }
             </td>
         </tr>
 }

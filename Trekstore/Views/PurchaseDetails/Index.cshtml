@@ -5,53 +5,94 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Reporte de Compras</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
-    <a asp-controller="SalesDetails" asp-action="Index">Sales Details</a>
-    <a asp-controller="Providers" asp-action="Index">Add Provider</a>
+    <a asp-action="Create">Agregar Nuevo Compra</a> |
+    <a asp-controller="Providers" asp-action="Index">Agregar Proveedor</a>
 
 </p>
+
+<form method="get" asp-controller="PurchaseDetails" asp-action="Index">
+    <div class="form-row">
+        <div class="col-md-12
+mb-3">
+            <input type="text" name="searchString" class="form-control" placeholder="Buscar por nombre de producto" value="@ViewData["CurrentFilter"]" />
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="input-group">
+                <input type="date" name="startDate" class="form-control" value="@ViewData["CurrentStartDate"]" />
+                <div class="input-group-prepend">
+                    <span class="input-group-text"> a </span>
+                </div>
+                <input type="date" name="endDate" class="form-control" value="@ViewData["CurrentEndDate"]" />
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <input type="submit" value="Buscar" class="btn btn-primary" />
+        </div>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Amount)
+                Producto
+
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PurchDate)
+                Cantidad
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Product)
+                Proveedor
+
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Provider)
+                Fecha de Compra
+
+            </th>
+            <th>
+                Tipo De Pago
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PurchDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Product.ProductName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Provider.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.purch_id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.purch_id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.purch_id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.ProductName)
+
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Provider.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PurchDate)
+
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TipoDePago.tipoPago)
+                </td>
+                <td>
+                    @if (ViewContext.HttpContext.User.IsInRole("Administrador"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.purch_id">Editar | </a>
+                        <a asp-action="Delete" asp-route-id="@item.purch_id">Eliminar</a>
+                    }
+
+                    @if (ViewContext.HttpContext.User.IsInRole("Supervisor"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.purch_id">Editar</a>
+
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

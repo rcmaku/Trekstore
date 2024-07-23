@@ -14,8 +14,14 @@ namespace Trekstore.Models
 
         public int? ClientId { get; set; }
 
+        public int? TipoDePagoID { get; set; }
+
         public virtual Client? Clients { get; set; }
 
         public virtual Products? Product { get; set; }
+
+        public virtual TipoDePago? TipoDePago{ get; set; }
+
+
     }
 }

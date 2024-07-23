@@ -19,7 +19,7 @@ namespace Trekstore.Controllers
         {
             _context = context;
         }
-        [Authorize]
+        [Authorize(Roles = "Administrador")]
         // GET: Providers
         public async Task<IActionResult> Index()
         {
@@ -27,6 +27,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Providers/Details/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -45,6 +46,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Providers/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
             return View();
@@ -53,6 +55,7 @@ namespace Trekstore.Controllers
         // POST: Providers/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProviderID,Name,Telephone,Address")] Providers providers)
@@ -67,6 +70,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Providers/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -85,6 +89,7 @@ namespace Trekstore.Controllers
         // POST: Providers/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProviderID,Name,Telephone,Address")] Providers providers)
@@ -118,6 +123,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Providers/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -136,6 +142,7 @@ namespace Trekstore.Controllers
         }
 
         // POST: Providers/Delete/5
+        [Authorize(Roles = "Administrador")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

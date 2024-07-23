@@ -5,35 +5,38 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<h1>Agregar Categoria</h1>
 
-<h4>Categories</h4>
+
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="CategoriaNombre" class="control-label">Category Name</label>
+                <label asp-for="CategoriaNombre" class="control-label">Categoria</label>
                 <input asp-for="CategoriaNombre" class="form-control" />
                 <span asp-validation-for="CategoriaNombre" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="CategoriaDescripcion" class="control-label">Description</label>
+                <label asp-for="CategoriaDescripcion" class="control-label">Descripcion</label>
                 <input asp-for="CategoriaDescripcion" class="form-control" />
                 <span asp-validation-for="CategoriaDescripcion" class="text-danger"></span>
             </div>
+            <br />
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Registrar" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
-
+<br />
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Regresar</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Trekstore.Areas.Identity.Data;
 
@@ -11,9 +12,11 @@ using Trekstore.Areas.Identity.Data;
 namespace Trekstore.Migrations
 {
     [DbContext(typeof(TrekstorDbContext))]
-    partial class TrekstorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240723002433_MigraPaymentType")]
+    partial class MigraPaymentType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

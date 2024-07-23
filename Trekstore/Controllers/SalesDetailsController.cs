@@ -13,6 +13,7 @@ namespace Trekstore.Controllers
 {
     public class SalesDetailsController : Controller
     {
+
         private readonly TrekstorDbContext _context;
 
         public SalesDetailsController(TrekstorDbContext context)
@@ -21,14 +22,22 @@ namespace Trekstore.Controllers
         }
 
         // GET: SalesDetails
-        [Authorize]
-        public async Task<IActionResult> Index()
+        [Authorize(Roles = "Administrador, Supervisor, Ventas")]
+        public async Task<IActionResult> Index(string searchString)
         {
-            var trekstorDbContext = _context.SalesDetails.Include(s => s.Clients).Include(s => s.Product);
-            return View(await trekstorDbContext.ToListAsync());
+            var salesDetails = from s in _context.SalesDetails.Include(s => s.Clients).Include(s => s.Product).Include(s=>s.TipoDePago)
+                               select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                salesDetails = salesDetails.Where(s => s.Clients.FirstName.Contains(searchString) || s.Clients.LastName.Contains(searchString));
+            }
+
+            return View(await salesDetails.ToListAsync());
         }
 
         // GET: SalesDetails/Details/5
+        [Authorize(Roles = "Administrador, Supervisor")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -39,6 +48,7 @@ namespace Trekstore.Controllers
             var salesDetails = await _context.SalesDetails
                 .Include(s => s.Clients)
                 .Include(s => s.Product)
+                .Include(s => s.TipoDePago)
                 .FirstOrDefaultAsync(m => m.SalesDetailsID == id);
             if (salesDetails == null)
             {
@@ -49,19 +59,23 @@ namespace Trekstore.Controllers
         }
 
         // GET: SalesDetails/Create
+        [Authorize(Roles = "Administrador, Supervisor, Ventas")]
         public IActionResult Create()
         {
-            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "ClientId");
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductDescription");
+            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "FirstName");
+            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductName");
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago");
             return View();
         }
 
         // POST: SalesDetails/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = " Administrador, Supervisor,Ventas")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SalesDetailsID,Amount,Date,ProductId,ClientId")] SalesDetails salesDetails)
+
+        public async Task<IActionResult> Create([Bind("SalesDetailsID,Amount,Date,ProductId,ClientId, TipoDePagoID")] SalesDetails salesDetails)
         {
             if (ModelState.IsValid)
             {
@@ -71,17 +85,26 @@ namespace Trekstore.Controllers
                     product.InStock -= salesDetails.Amount;
                     _context.Add(salesDetails);
                     await _context.SaveChangesAsync();
+
+                    if (product.InStock <= 10)
+                    {
+                        TempData["AlertMessage"] = "Producto bajo en existencias, adquirir más productos.";
+                    }
+
                     return RedirectToAction(nameof(Index));
                 }
-                ModelState.AddModelError("", "Insufficient stock for the selected product.");
 
+                ModelState.AddModelError("", "Existencias insuficientes para el producto seleccionado.");
             }
-            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "ClientId", salesDetails.ClientId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductDescription", salesDetails.ProductId);
+
+            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "FirstName", salesDetails.ClientId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductName", salesDetails.ProductId);
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago", salesDetails.TipoDePagoID);
             return View(salesDetails);
         }
 
         // GET: SalesDetails/Edit/5
+        [Authorize(Roles = "Administrador, Supervisor")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -94,17 +117,19 @@ namespace Trekstore.Controllers
             {
                 return NotFound();
             }
-            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "ClientId", salesDetails.ClientId);
+            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "FirstName", salesDetails.ClientId);
             ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductDescription", salesDetails.ProductId);
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago", salesDetails.TipoDePagoID);
             return View(salesDetails);
         }
 
         // POST: SalesDetails/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Administrador, Supervisor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SalesDetailsID,Amount,Date,ProductId,ClientId")] SalesDetails salesDetails)
+        public async Task<IActionResult> Edit(int id, [Bind("SalesDetailsID,Amount,Date,ProductId,ClientId,TipoDePagoID")] SalesDetails salesDetails)
         {
             if (id != salesDetails.SalesDetailsID)
             {
@@ -131,12 +156,14 @@ namespace Trekstore.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "ClientId", salesDetails.ClientId);
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductDescription", salesDetails.ProductId);
+            ViewData["ClientId"] = new SelectList(_context.Client, "ClientId", "FirstName", salesDetails.ClientId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductName", salesDetails.ProductId);
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago", salesDetails.TipoDePagoID);
             return View(salesDetails);
         }
 
         // GET: SalesDetails/Delete/5
+        [Authorize(Roles = "Administrador, Supervisor")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -147,6 +174,7 @@ namespace Trekstore.Controllers
             var salesDetails = await _context.SalesDetails
                 .Include(s => s.Clients)
                 .Include(s => s.Product)
+                .Include(s => s.TipoDePago)
                 .FirstOrDefaultAsync(m => m.SalesDetailsID == id);
             if (salesDetails == null)
             {
@@ -157,6 +185,8 @@ namespace Trekstore.Controllers
         }
 
         // POST: SalesDetails/Delete/5
+        [Authorize(Roles = "Administrador, Supervisor")]
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -177,3 +207,4 @@ namespace Trekstore.Controllers
         }
     }
 }
+

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Trekstore.Areas.Identity.Data;
 
@@ -11,13 +12,15 @@ using Trekstore.Areas.Identity.Data;
 namespace Trekstore.Migrations
 {
     [DbContext(typeof(TrekstorDbContext))]
-    partial class TrekstorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240624212501_5thMigration")]
+    partial class _5thMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -360,18 +363,55 @@ namespace Trekstore.Migrations
                     b.Property<DateTime>("PurchDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("TipoDePagoID")
-                        .HasColumnType("int");
-
                     b.HasKey("purch_id");
 
                     b.HasIndex("ProductID");
 
                     b.HasIndex("ProviderID");
 
-                    b.HasIndex("TipoDePagoID");
-
                     b.ToTable("PurchaseDetails");
+                });
+
+            modelBuilder.Entity("Trekstore.Models.Purchases", b =>
+                {
+                    b.Property<int>("PurchaseID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PurchaseID"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.HasKey("PurchaseID");
+
+                    b.ToTable("Purchases");
+                });
+
+            modelBuilder.Entity("Trekstore.Models.Sales", b =>
+                {
+                    b.Property<int>("SalesID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SalesID"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClientID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.HasKey("SalesID");
+
+                    b.HasIndex("ClientID");
+
+                    b.HasIndex("ProductID");
+
+                    b.ToTable("Sales");
                 });
 
             modelBuilder.Entity("Trekstore.Models.SalesDetails", b =>
@@ -394,35 +434,13 @@ namespace Trekstore.Migrations
                     b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TipoDePagoID")
-                        .HasColumnType("int");
-
                     b.HasKey("SalesDetailsID");
 
                     b.HasIndex("ClientId");
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("TipoDePagoID");
-
                     b.ToTable("SalesDetails");
-                });
-
-            modelBuilder.Entity("Trekstore.Models.TipoDePago", b =>
-                {
-                    b.Property<int>("tipoPagoID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("tipoPagoID"));
-
-                    b.Property<string>("tipoPago")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("tipoPagoID");
-
-                    b.ToTable("TipoDePago");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -497,15 +515,28 @@ namespace Trekstore.Migrations
                         .WithMany("PurchaseDetails")
                         .HasForeignKey("ProviderID");
 
-                    b.HasOne("Trekstore.Models.TipoDePago", "TipoDePago")
-                        .WithMany("PurchaseDetails")
-                        .HasForeignKey("TipoDePagoID");
-
                     b.Navigation("Product");
 
                     b.Navigation("Provider");
+                });
 
-                    b.Navigation("TipoDePago");
+            modelBuilder.Entity("Trekstore.Models.Sales", b =>
+                {
+                    b.HasOne("Trekstore.Models.Client", "Clients")
+                        .WithMany()
+                        .HasForeignKey("ClientID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Trekstore.Models.Products", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Clients");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Trekstore.Models.SalesDetails", b =>
@@ -518,15 +549,9 @@ namespace Trekstore.Migrations
                         .WithMany("SalesDetails")
                         .HasForeignKey("ProductId");
 
-                    b.HasOne("Trekstore.Models.TipoDePago", "TipoDePago")
-                        .WithMany("SalesDetails")
-                        .HasForeignKey("TipoDePagoID");
-
                     b.Navigation("Clients");
 
                     b.Navigation("Product");
-
-                    b.Navigation("TipoDePago");
                 });
 
             modelBuilder.Entity("Trekstore.Models.Categories", b =>
@@ -549,13 +574,6 @@ namespace Trekstore.Migrations
             modelBuilder.Entity("Trekstore.Models.Providers", b =>
                 {
                     b.Navigation("PurchaseDetails");
-                });
-
-            modelBuilder.Entity("Trekstore.Models.TipoDePago", b =>
-                {
-                    b.Navigation("PurchaseDetails");
-
-                    b.Navigation("SalesDetails");
                 });
 #pragma warning restore 612, 618
         }

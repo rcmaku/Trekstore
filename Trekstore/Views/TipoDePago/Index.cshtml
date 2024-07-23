@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Trekstore.Models.Purchases>
+﻿@model IEnumerable<Trekstore.Models.TipoDePago>
 
 @{
     ViewData["Title"] = "Index";
@@ -14,7 +14,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Amount)
+                @Html.DisplayNameFor(model => model.tipoPago)
             </th>
             <th></th>
         </tr>
@@ -23,12 +23,12 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Amount)
+                @Html.DisplayFor(modelItem => item.tipoPago)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.PurchaseID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PurchaseID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PurchaseID">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.tipoPagoID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.tipoPagoID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.tipoPagoID">Delete</a>
             </td>
         </tr>
 }

@@ -20,15 +20,25 @@ namespace Trekstore.Controllers
             _context = context;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Administrador, Supervisor")]
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var trekstorDbContext = _context.Products.Include(p => p.Category);
-            return View(await trekstorDbContext.ToListAsync());
+            var products = from p in _context.Products
+                           select p;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(s => s.ProductName.Contains(searchString));
+            }
+
+            products = products.Include(p => p.Category);
+
+            return View(await products.ToListAsync());
         }
 
         // GET: Products/Details/5
+        [Authorize(Roles = "Administrador, Supervisor")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -48,6 +58,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Products/Create
+        [Authorize(Roles = "Administrador")]
         public IActionResult Create()
         {
             ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoriaNombre");
@@ -57,6 +68,7 @@ namespace Trekstore.Controllers
         // POST: Products/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductId,ProductName,ProductDescription,ProductPrice,CategoryID")] Products products)
@@ -72,6 +84,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Products/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -91,6 +104,7 @@ namespace Trekstore.Controllers
         // POST: Products/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductName,ProductDescription,ProductPrice,CategoryID")] Products products)
@@ -125,6 +139,7 @@ namespace Trekstore.Controllers
         }
 
         // GET: Products/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -144,6 +159,7 @@ namespace Trekstore.Controllers
         }
 
         // POST: Products/Delete/5
+        [Authorize(Roles = "Administrador")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

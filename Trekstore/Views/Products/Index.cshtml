@@ -5,52 +5,76 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Productos</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Agregar Nuevo Producto</a> |
     <a asp-controller="Categories" asp-action="Index">Categorias de Producto</a>
 </p>
-</p>
+    </p>
+<form method="get" asp-controller="Products" asp-action="Index">
+    <div class="form-group">
+        <input type="text" name="searchString" class="form-control" placeholder="Buscar por nombre de producto" value="@ViewData["CurrentFilter"]" />
+        <br />
+        <input type="submit" value="Buscar" class="btn btn-primary" />
+    </div>
+</form>
+<br />
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.ProductName)
+                Producto
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductDescription)
+                Descripcion
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ProductPrice)
+                Precio
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Category)
+                Categoria
+            </th>
+            <th>
+                InStock
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ProductPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.CategoriaNombre)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ProductId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ProductId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProductId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductDescription)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.CategoriaNombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.InStock)
+                </td>
+                <td>
+                    @if (ViewContext.HttpContext.User.IsInRole("Administrador"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ProductId">Editar |</a>
+                        <a asp-action="Delete" asp-route-id="@item.ProductId">Eliminar</a>
+                    }
+
+                    @if (ViewContext.HttpContext.User.IsInRole("Supervisor"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ProductId">Editar |</a>
+
+                    }
+
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

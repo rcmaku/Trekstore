@@ -21,14 +21,34 @@ namespace Trekstore.Controllers
         {
             _context = context;
         }
-        [Authorize]
+        [Authorize(Roles = "Administrador, Supervisor")]
         // GET: PurchaseDetails
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, DateTime? startDate, DateTime? endDate)
         {
-            var trekstorDbContext = _context.PurchaseDetails.Include(p => p.Product).Include(p => p.Provider);
-            return View(await trekstorDbContext.ToListAsync());
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["CurrentStartDate"] = startDate?.ToString("yyyy-MM-dd");
+            ViewData["CurrentEndDate"] = endDate?.ToString("yyyy-MM-dd");
+
+            var purchaseDetails = _context.PurchaseDetails
+                                           .Include(p => p.Product)
+                                           .Include(p => p.Provider)
+                                           .Include(p => p.TipoDePago)
+                                           .AsQueryable();
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                purchaseDetails = purchaseDetails.Where(s => s.Product.ProductName.Contains(searchString));
+            }
+
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                purchaseDetails = purchaseDetails.Where(p => p.PurchDate >= startDate && p.PurchDate <= endDate);
+            }
+
+            return View(await purchaseDetails.ToListAsync());
         }
 
+        [Authorize(Roles = "Administrador")]
         // GET: PurchaseDetails/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -40,6 +60,7 @@ namespace Trekstore.Controllers
             var purchaseDetails = await _context.PurchaseDetails
                 .Include(p => p.Product)
                 .Include(p => p.Provider)
+                .Include(p => p.TipoDePago)
                 .FirstOrDefaultAsync(m => m.purch_id == id);
             if (purchaseDetails == null)
             {
@@ -50,10 +71,13 @@ namespace Trekstore.Controllers
         }
 
         // GET: PurchaseDetails/Create
+        [Authorize(Roles = "Administrador, Ventas")]
         public IActionResult Create()
         {
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductDescription");
-            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "ProviderID");
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductName");
+            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "Name");
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago");
+
             return View();
         }
 
@@ -62,24 +86,27 @@ namespace Trekstore.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("purch_id,Amount,PurchDate,ProductID,ProviderID")] PurchaseDetails purchaseDetails)
+        [Authorize(Roles = "Administrador, Ventas")]
+        public async Task<IActionResult> Create([Bind("purch_id,Amount,PurchDate,ProductID,ProviderID, TipoDePagoID")] PurchaseDetails purchaseDetails)
         {
             if (ModelState.IsValid)
             {
                 var product = await _context.Products.FindAsync(purchaseDetails.ProductID);
-                
-                    product.InStock += purchaseDetails.Amount;
-                    _context.Add(purchaseDetails);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                
+
+                product.InStock += purchaseDetails.Amount;
+                _context.Add(purchaseDetails);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+
             }
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductDescription", purchaseDetails.ProductID);
-            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "ProviderID", purchaseDetails.ProviderID);
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductName", purchaseDetails.ProductID);
+            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "Name", purchaseDetails.ProviderID);
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago", purchaseDetails.TipoDePagoID);
             return View(purchaseDetails);
         }
 
         // GET: PurchaseDetails/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -92,17 +119,19 @@ namespace Trekstore.Controllers
             {
                 return NotFound();
             }
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductDescription", purchaseDetails.ProductID);
-            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "ProviderID", purchaseDetails.ProviderID);
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductName", purchaseDetails.ProductID);
+            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "Name", purchaseDetails.ProviderID);
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago", purchaseDetails.TipoDePagoID);
             return View(purchaseDetails);
         }
 
         // POST: PurchaseDetails/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("purch_id,Amount,PurchDate,ProductID,ProviderID")] PurchaseDetails purchaseDetails)
+        public async Task<IActionResult> Edit(int id, [Bind("purch_id,Amount,PurchDate,ProductID,ProviderID, tipoPagoID")] PurchaseDetails purchaseDetails)
         {
             if (id != purchaseDetails.purch_id)
             {
@@ -129,12 +158,14 @@ namespace Trekstore.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductDescription", purchaseDetails.ProductID);
-            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "ProviderID", purchaseDetails.ProviderID);
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductId", "ProductName", purchaseDetails.Product);
+            ViewData["ProviderID"] = new SelectList(_context.Providers, "ProviderID", "Name", purchaseDetails.ProviderID);
+            ViewData["TipoDePagoID"] = new SelectList(_context.TipoDePago, "tipoPagoID", "tipoPago", purchaseDetails.TipoDePagoID);
             return View(purchaseDetails);
         }
 
         // GET: PurchaseDetails/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -145,6 +176,7 @@ namespace Trekstore.Controllers
             var purchaseDetails = await _context.PurchaseDetails
                 .Include(p => p.Product)
                 .Include(p => p.Provider)
+                .Include(p=> p.TipoDePago)
                 .FirstOrDefaultAsync(m => m.purch_id == id);
             if (purchaseDetails == null)
             {
@@ -155,6 +187,7 @@ namespace Trekstore.Controllers
         }
 
         // POST: PurchaseDetails/Delete/5
+        [Authorize(Roles = "Administrador")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -175,3 +208,4 @@ namespace Trekstore.Controllers
         }
     }
 }
+

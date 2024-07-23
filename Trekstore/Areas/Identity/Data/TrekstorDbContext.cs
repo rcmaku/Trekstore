@@ -30,11 +30,9 @@ public class TrekstorDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<Trekstore.Models.PurchaseDetails> PurchaseDetails { get; set; } = default!;
 
-    public DbSet<Trekstore.Models.Purchases> Purchases { get; set; } = default!;
-
-    public DbSet<Trekstore.Models.Sales> Sales { get; set; } = default!;
-
     public DbSet<Trekstore.Models.SalesDetails> SalesDetails { get; set; } = default!;
+
+public DbSet<Trekstore.Models.TipoDePago> TipoDePago { get; set; } = default!;
 
 }
 /*

@@ -5,58 +5,81 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Reporte de Ventas</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
-    <a asp-controller="PurchaseDetails" asp-action="Index">Purchase Details</a>
-    <a asp-controller="Clients" asp-action="Index">Clients</a>
+    <a asp-controller="Clients" asp-action="Index">Clientes </a> |
+    <a asp-action="Create">Nueva Venta</a>
 </p>
+<form method="get" asp-controller="SalesDetails" asp-action="Index">
+    <div class="form-group">
+        <input type="text" name="searchString" class="form-control" placeholder="Buscar por nombre de producto" value="@ViewData["CurrentFilter"]" />
+        <br />
+        <input type="submit" value="Buscar" class="btn btn-primary" />
+    </div>
+</form>
+<br />
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Amount)
+                Producto
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Date)
+                Cantidad
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Clients)
-            </th>
-                        <th>
-                @Html.DisplayNameFor(model => model.Clients)
+                Primer Nombre del Cliente
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Product)
+                Apellido
+            </th>
+            <th>
+                Fecha
+            </th>
+            <th>
+                Tipo de Pago
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Date)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Clients.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Clients.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Product.ProductName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.SalesDetailsID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.SalesDetailsID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.SalesDetailsID">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Clients.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Clients.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Date)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TipoDePago.tipoPago)
+                </td>
+
+                <td>
+                    @if (ViewContext.HttpContext.User.IsInRole("Administrador"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.SalesDetailsID">Editar</a>
+                        <a asp-action="Delete" asp-route-id="@item.SalesDetailsID">Eliminar</a>
+                    }
+
+                    @if (ViewContext.HttpContext.User.IsInRole("Supervisor"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.SalesDetailsID">Editar</a>
+
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
